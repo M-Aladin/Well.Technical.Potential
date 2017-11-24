@@ -119,6 +119,7 @@ inspect(gupta2017)
 
 
 ```{r}
+# one-word terms in gupta2017 paper
 gupta2017.tdm <- TermDocumentMatrix(gupta2017, 
                                     control = list(removePunctuation = TRUE, 
                                                    stopwords = TRUE,
@@ -128,6 +129,43 @@ gupta2017.tdm <- TermDocumentMatrix(gupta2017,
                                                    ))
 inspect(gupta2017.tdm)
 ```
+
+```{r}
+findFreqTerms(gupta2017.tdm, lowfreq = 50, highfreq = Inf)
+```
+
+
+## Analizing the second paper `ruslan2014`
+
+```{r}
+# frequency analysis of ruslan2014
+theFile <- "ruslan2014.pdf"
+paper_corpus <- Corpus(URISource(theFile), 
+                   readerControl = list(reader = Rpdf))
+
+inspect(paper_corpus)
+
+# one-word terms in gupta2017 paper
+paper.tdm <- TermDocumentMatrix(paper_corpus, 
+                                    control = list(removePunctuation = TRUE, 
+                                                   stopwords = TRUE,
+                                                   tolower = TRUE,
+                                                   removeNumbers = TRUE
+                                                   #stemming = TRUE
+                                                   ))
+inspect(paper.tdm)
+
+findFreqTerms(paper.tdm, lowfreq = 50, highfreq = Inf)
+```
+
+
+
+
+
+
+
+
+
 
 
 ```{r}
