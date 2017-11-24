@@ -1,0 +1,77 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(petro.One)
+my_url <- make_search_url(query = "technical potential", 
+                           how = "all")
+get_papers_count(my_url)
+# [1] 132
+df <- read_multidoc(my_url)
+```
+
+```{r}
+df
+```
+
+
+```{r}
+library(tm)
+
+tf1 <- term_frequency(df)
+tf1
+```
+
+```{r}
+tf2 <- term_frequency_n_grams(df, gram.min = 2, gram.max = 2)
+tf2
+```
+
+
+```{r}
+write.csv(df, file = "technical_potential.csv")
+```
+
+
+
+
+```{r}
+library(RWeka)
+term_frequency_n_grams <- function (df, gram.min = 2, gram.max = 2) 
+{
+    vdocs <- VCorpus(VectorSource(df$title_data))
+    vdocs <- tm_map(vdocs, content_transformer(function(x) iconv(enc2utf8(x), 
+                                                                 sub = "byte")))
+    vdocs <- tm_map(vdocs, content_transformer(tolower))
+    vdocs <- tm_map(vdocs, removeWords, stopwords("english"))
+    vdocs <- tm_map(vdocs, removeWords, custom_stopwords)
+    vdocs <- tm_map(vdocs, stripWhitespace)
+    vdocs <- tm_map(vdocs, removePunctuation)
+    tdm <- TermDocumentMatrix(vdocs)
+    tdm.matrix <- as.matrix(tdm)
+    tdm.rs <- sort(rowSums(tdm.matrix), decreasing = TRUE)
+    tdm.df <- data.frame(word = names(tdm.rs), freq = as.integer(tdm.rs), 
+        stringsAsFactors = FALSE)
+    options(mc.cores = 1)
+    twogramTokenizer <- function(x) {
+        NGramTokenizer(x, Weka_control(min = gram.min, max = gram.max))
+    }
+    tdm2 <- TermDocumentMatrix(vdocs, control = list(tokenize = twogramTokenizer))
+    tdm2.matrix <- as.matrix(tdm2)
+    tdm2.rs <- sort(rowSums(tdm2.matrix), decreasing = TRUE)
+    tdm2.df <- data.frame(word = names(tdm2.rs), freq = tdm2.rs, 
+        stringsAsFactors = FALSE)
+    tibble::as.tibble(tdm2.df)
+}
+
+```
+
+
+
+```{r}
+df$title <- tolower(df$title_data)
+df[grep("technical potential", df$title), c("title_data", "paper_id")]
+```
+
