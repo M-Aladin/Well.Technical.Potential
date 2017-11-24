@@ -23,6 +23,12 @@ df$title <- tolower(df$title_data)
 df[grep("technical potential", df$title), c("title_data", "paper_id")]
 ```
 
+We acquire the two first papers and proceed to do some data mining on the PDF paper itself.
+
+```{r}
+dir(pattern = ".pdf")
+```
+
 
 ## What are the most common 1-words
 
@@ -94,3 +100,69 @@ df[grep(pattern, df$title), c("title_data", "paper_id")]
 ```
 
 
+```{r}
+files <- list.files(pattern = ".pdf$")
+files
+```
+
+```{r}
+Rpdf <- readPDF(control = list(text = "-layout"))
+```
+
+
+```{r}
+theFile <- "gupta2017.pdf"
+gupta2017 <- Corpus(URISource(theFile), 
+                   readerControl = list(reader = Rpdf))
+inspect(gupta2017)
+```
+
+
+```{r}
+gupta2017.tdm <- TermDocumentMatrix(gupta2017, 
+                                    control = list(removePunctuation = TRUE, 
+                                                   stopwords = TRUE,
+                                                   tolower = TRUE,
+                                                   removeNumbers = TRUE
+                                                   #stemming = TRUE
+                                                   ))
+inspect(gupta2017.tdm)
+```
+
+
+```{r}
+opinions <- Corpus(URISource(files), 
+                   readerControl = list(reader = Rpdf))
+```
+
+```{r}
+opinions
+```
+
+```{r}
+opinions.tdm <- TermDocumentMatrix(opinions, control = list(removePunctuation = TRUE,
+                                                         stopwords = TRUE,
+                                                         tolower = TRUE,
+                                                         stemming = TRUE,
+                                                         removeNumbers = TRUE,
+                                                         bounds = list(global = c(3, Inf)))) 
+```
+
+```{r}
+inspect(opinions.tdm[1:2,]) 
+```
+
+
+
+```{r}
+# giving error
+# check last statement
+gupta2017.tdm <- TermDocumentMatrix(gupta2017, 
+                                    control = list(removePunctuation = TRUE,
+                                                         stopwords = TRUE,
+                                                         tolower = TRUE,
+                                                         stemming = TRUE,
+                                                         removeNumbers = TRUE,
+                                                         bounds = list(global = c(3, Inf)))) 
+inspect(gupta2017.tdm)
+```
