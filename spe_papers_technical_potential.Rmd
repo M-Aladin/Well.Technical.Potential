@@ -134,6 +134,34 @@ inspect(gupta2017.tdm)
 findFreqTerms(gupta2017.tdm, lowfreq = 50, highfreq = Inf)
 ```
 
+```{r}
+# frequency analysis of gupta2017
+theFile <- "gupta2017.pdf"
+paper_corpus <- Corpus(URISource(theFile), 
+                   readerControl = list(reader = Rpdf))
+
+inspect(paper_corpus)
+
+# one-word terms in gupta2017 paper
+paper.tdm <- TermDocumentMatrix(paper_corpus, 
+                                    control = list(removePunctuation = TRUE, 
+                                                   stopwords = TRUE,
+                                                   tolower = TRUE,
+                                                   removeNumbers = TRUE
+                                                   #stemming = TRUE
+                                                   ))
+inspect(paper.tdm)
+
+findFreqTerms(paper.tdm, lowfreq = 50, highfreq = Inf)
+findMostFreqTerms(paper.tdm)
+
+tdm.matrix <- as.matrix(paper.tdm)
+tdm.rs <- sort(rowSums(tdm.matrix), decreasing = TRUE)
+tdm.df1 <- data.frame(word = names(tdm.rs), freq = tdm.rs, stringsAsFactors = FALSE)
+tdm.df1
+
+```
+
 
 ## Analizing the second paper `ruslan2014`
 
@@ -156,10 +184,50 @@ paper.tdm <- TermDocumentMatrix(paper_corpus,
 inspect(paper.tdm)
 
 findFreqTerms(paper.tdm, lowfreq = 50, highfreq = Inf)
+
+tdm.matrix <- as.matrix(paper.tdm)
+tdm.rs <- sort(rowSums(tdm.matrix), decreasing = TRUE)
+tdm.df2 <- data.frame(word = names(tdm.rs), freq = tdm.rs, stringsAsFactors = FALSE)
+tdm.df2
+
+```
+
+```{r}
+tdm.matrix <- as.matrix(paper.tdm)
+tdm.rs <- sort(rowSums(tdm.matrix), decreasing = TRUE)
+tdm.df <- data.frame(word = names(tdm.rs), freq = tdm.rs, stringsAsFactors = FALSE)
+tdm.df
+```
+
+```{r fig.asp=1.1}
+library(ggplot2)
+p1 <- ggplot(subset(tdm.df1, freq > 30), aes(x=word, y=freq)) + 
+    geom_bar(stat = "identity") + 
+    xlab("Terms") + ylab("Count") + 
+    coord_flip()
+
+p2 <- ggplot(subset(tdm.df2, freq > 30), aes(x=reorder(word, freq), y=freq)) + 
+    geom_bar(stat = "identity") + 
+    xlab("Terms") + ylab("Count") + 
+    coord_flip()
+
+require("gridExtra")
+grid.arrange(arrangeGrob(p1, p2))
 ```
 
 
+## Another interesting thing
 
+
+```{r}
+library(ggplot2)
+
+p3 <- ggplot(subset(tf2, freq > 2), aes(x=word, y=freq)) + 
+    geom_bar(stat = "identity") + 
+    xlab("Terms") + ylab("Count") + 
+    coord_flip()
+p3
+```
 
 
 
