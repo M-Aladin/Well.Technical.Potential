@@ -42,6 +42,8 @@ library(RWeka)
 term_frequency_n_grams <- function (df, gram.min = 2, gram.max = 2) 
 {
     vdocs <- VCorpus(VectorSource(df$title_data))
+    # this fixes the function in petro.One for international characters
+    # See https://stackoverflow.com/questions/9637278/r-tm-package-invalid-input-in-utf8towcs
     vdocs <- tm_map(vdocs, content_transformer(function(x) iconv(enc2utf8(x), 
                                                                  sub = "byte")))
     vdocs <- tm_map(vdocs, content_transformer(tolower))
