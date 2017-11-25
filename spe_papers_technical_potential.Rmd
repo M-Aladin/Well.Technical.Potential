@@ -1,33 +1,30 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
-```{r}
+```{r results="hold"}
 library(petro.One)
 my_url <- make_search_url(query = "technical potential", 
                            how = "all")
 get_papers_count(my_url)
 # [1] 132
 df <- read_multidoc(my_url)
-```
-
-```{r}
 df
 ```
+
 
 ## How many papers with "technical" and "potential"
 
 ```{r}
 df$title <- tolower(df$title_data)
-df[grep("technical potential", df$title), c("title_data", "paper_id")]
+
+# df[grep("technical potential", df$title), c("title_data", "paper_id")]
 ```
 
-We acquire the two first papers and proceed to do some data mining on the PDF paper itself.
 
-```{r}
-dir(pattern = ".pdf")
-```
 
 
 ## What are the most common 1-words
@@ -134,13 +131,15 @@ inspect(gupta2017.tdm)
 findFreqTerms(gupta2017.tdm, lowfreq = 50, highfreq = Inf)
 ```
 
+# Term freqency analysis for the first paper
+
 ```{r}
 # frequency analysis of gupta2017
 theFile <- "gupta2017.pdf"
 paper_corpus <- Corpus(URISource(theFile), 
                    readerControl = list(reader = Rpdf))
 
-inspect(paper_corpus)
+# inspect(paper_corpus)
 
 # one-word terms in gupta2017 paper
 paper.tdm <- TermDocumentMatrix(paper_corpus, 
@@ -150,7 +149,7 @@ paper.tdm <- TermDocumentMatrix(paper_corpus,
                                                    removeNumbers = TRUE
                                                    #stemming = TRUE
                                                    ))
-inspect(paper.tdm)
+# inspect(paper.tdm)
 
 findFreqTerms(paper.tdm, lowfreq = 50, highfreq = Inf)
 findMostFreqTerms(paper.tdm)
@@ -231,44 +230,25 @@ p3
 
 
 
+We acquire the two first papers and proceed to do some data mining on the PDF paper itself.
+
+```{r}
+dir(pattern = ".pdf")
+```
 
 
 
 
 
 ```{r}
-opinions <- Corpus(URISource(files), 
-                   readerControl = list(reader = Rpdf))
+# opinions <- Corpus(URISource(files), 
+#                    readerControl = list(reader = Rpdf))
+# opinions.tdm <- TermDocumentMatrix(opinions, control = list(removePunctuation = TRUE,
+#                                                          stopwords = TRUE,
+#                                                          tolower = TRUE,
+#                                                          stemming = TRUE,
+#                                                          removeNumbers = TRUE,
+#                                                          bounds = list(global = c(3, Inf)))) 
+# inspect(opinions.tdm[1:2,]) 
 ```
 
-```{r}
-opinions
-```
-
-```{r}
-opinions.tdm <- TermDocumentMatrix(opinions, control = list(removePunctuation = TRUE,
-                                                         stopwords = TRUE,
-                                                         tolower = TRUE,
-                                                         stemming = TRUE,
-                                                         removeNumbers = TRUE,
-                                                         bounds = list(global = c(3, Inf)))) 
-```
-
-```{r}
-inspect(opinions.tdm[1:2,]) 
-```
-
-
-
-```{r}
-# giving error
-# check last statement
-gupta2017.tdm <- TermDocumentMatrix(gupta2017, 
-                                    control = list(removePunctuation = TRUE,
-                                                         stopwords = TRUE,
-                                                         tolower = TRUE,
-                                                         stemming = TRUE,
-                                                         removeNumbers = TRUE,
-                                                         bounds = list(global = c(3, Inf)))) 
-inspect(gupta2017.tdm)
-```
