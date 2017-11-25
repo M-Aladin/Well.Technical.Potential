@@ -1,0 +1,180 @@
+---
+title: "Article"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r results="hold"}
+library(petro.One)
+my_url <- make_search_url(query = "technical potential", 
+                           how = "all")
+num_papers <- get_papers_count(my_url)
+# [1] 132
+df <- read_multidoc(my_url)
+df
+```
+
+## How many papers with "technical" and "potential"
+We assume that the papers with stronger "technical potential" content are those that have in the title those words. We will look at papers in the title.
+
+```{r results='hold'}
+df$title <- tolower(df$title_data)
+# df[grep("technical potential", df$title), c("title_data", "paper_id")]
+df[grep("technical potential", df$title), ]
+```
+
+There are `r nrow(df[grep("technical potential", df$title), ])` papers that have `technical potential` in their title.
+
+```{r eval=FALSE, echo=FALSE}
+# in text R commands
+nrow(df[grep("technical potential", df$title), ])
+```
+
+At this point, we could do two things:
+
+* retrieve the papers that have `technical potential` in the title
+* perform an additional 1-word and 2-word terms analysis on the `r num_papers` that match our query.
+
+We will do first a text mining of the papers that gave a match on the title:
+
+```{r}
+df[grep("technical potential", df$title), c("source", "paper_id")]
+```
+
+## What are the papers
+We list the papers that have been retrieved for analysis.
+
+```{r}
+files <- list.files(pattern = ".pdf$")
+files
+```
+
+## Read the PDF files and inspect the corpus
+The follwing operation is reading the papers that are in PDF format. `R` has a way to read PDF files through the function `readPDF` of the package `tm`.
+
+
+```{r results='hold'}
+library(tm)
+
+Rpdf <- readPDF(control = list(text = "-layout"))
+papers <- Corpus(URISource(files), 
+                   readerControl = list(reader = Rpdf))
+
+inspect(papers)
+
+# one-word terms in gupta2017 paper
+papers.tdm <- TermDocumentMatrix(papers, 
+                                    control = list(removePunctuation = TRUE, 
+                                                   stopwords = TRUE,
+                                                   tolower = TRUE,
+                                                   removeNumbers = TRUE
+                                                   #stemming = TRUE
+                                                   ))
+inspect(papers.tdm)
+```
+
+```{r}
+# how many terms per paper
+sapply(papers, function(x) length(termFreq(x)) )
+```
+
+## First analysis
+
+                 
+    Docs        gupta2017.pdf quong1982.pdf ruslan2014.pdf
+    Num Chars      58230           50343        27492
+    Terms           2274            1878         1207
+    
+
+We can see that the document with more content is gupta2017, the second quong1982, and the third, ruslan2014. But we will find something interesting.
+
+
+## Find the most frequent terms in the papers
+
+```{r}
+# findFreqTerms(papers.tdm, lowfreq = 50, highfreq = Inf)
+findMostFreqTerms(papers.tdm)
+```
+
+What is happening here is that even though "technical potential" is in the title of  `quong1982`, the paper is not strong in technical potential, per se. The other two papers are stronger.
+
+## Focus our attention on only two papers
+
+```{r results='hold'}
+tm_term_score(papers.tdm, "technical")
+tm_term_score(papers.tdm, "potential")
+```
+
+# Term freqency analysis for the first paper
+
+```{r}
+# frequency analysis of gupta2017
+theFile <- "gupta2017.pdf"
+paper <- Corpus(URISource(theFile), 
+                   readerControl = list(reader = Rpdf))
+
+paper.tdm <- TermDocumentMatrix(paper, 
+                                    control = list(removePunctuation = TRUE, 
+                                                   stopwords = TRUE,
+                                                   tolower = TRUE,
+                                                   removeNumbers = TRUE
+                                                   #stemming = TRUE
+                                                   ))
+findFreqTerms(paper.tdm, lowfreq = 50, highfreq = Inf)
+findMostFreqTerms(paper.tdm)
+
+tdm.matrix <- as.matrix(paper.tdm)
+tdm.rs <- sort(rowSums(tdm.matrix), decreasing = TRUE)
+tdm.df1 <- data.frame(word = names(tdm.rs), freq = tdm.rs, stringsAsFactors = FALSE)
+tdm.df1
+```
+
+# Term freqency analysis for the second paper
+
+```{r}
+# frequency analysis of ruslan2014
+theFile <- "ruslan2014.pdf"
+paper <- Corpus(URISource(theFile), 
+                   readerControl = list(reader = Rpdf))
+
+paper.tdm <- TermDocumentMatrix(paper, 
+                                    control = list(removePunctuation = TRUE, 
+                                                   stopwords = TRUE,
+                                                   tolower = TRUE,
+                                                   removeNumbers = TRUE
+                                                   #stemming = TRUE
+                                                   ))
+findFreqTerms(paper.tdm, lowfreq = 50, highfreq = Inf)
+findMostFreqTerms(paper.tdm)
+
+tdm.matrix <- as.matrix(paper.tdm)
+tdm.rs <- sort(rowSums(tdm.matrix), decreasing = TRUE)
+tdm.df2 <- data.frame(word = names(tdm.rs), freq = tdm.rs, stringsAsFactors = FALSE)
+tdm.df2
+```
+
+## Plotting
+
+```{r fig.asp=1.1}
+library(ggplot2)
+p1 <- ggplot(subset(tdm.df1, freq > 30), aes(x=word, y=freq)) + 
+    geom_bar(stat = "identity", width = 0.8) + 
+    xlab("Terms") + ylab("Count") + ggtitle("gupta2017") +
+    coord_flip()
+
+p2 <- ggplot(subset(tdm.df2, freq > 30), aes(x=reorder(word, freq), y=freq)) + 
+    geom_bar(stat = "identity", width = 0.2) + 
+    xlab("Terms") + ylab("Count") + ggtitle("ruslan2014") +
+    coord_flip()
+
+require("gridExtra")
+grid.arrange(arrangeGrob(p1, p2))
+```
+
+## Conclusion
+We rapidly determined in our study for the term "technical potential", which papers are the best candidates. We used text mining to take that decision and narrow down from 132 to 2 papers that search and the acquisition of those papers.
+
+This doesn't mean that we should discard reading the other 130 papers; but doing a deeper analysis of all the papers requires purchasing and downloading all of them If this option is viable, we may find that other papers may contain interesting content for the subject of our research. In the case of our study for reasons of time and budget we came up rapidly to only those two papers.
+
