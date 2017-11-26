@@ -262,3 +262,8 @@ grid.arrange(arrangeGrob(p1, p2))
 
 This doesn't mean that we should discard reading the other 130 papers; but doing a deeper analysis of all the papers requires purchasing and downloading all of them. If this option is viable, we may find that other papers may contain interesting content for the subject of our research. In the case of our study for reasons of time and budget we came up rapidly to only those two papers.
 
+## References
+* [Article in LinkedIn](https://www.linkedin.com/pulse/text-mining-petroleum-engineering-modern-techniques-paper-reyes/)
+
+* [GitHub repository](https://github.com/f0nzie/Well.Technical.Potential)
+
