@@ -1,7 +1,7 @@
-name: Well.Technical.Potential
+name: "Well.Technical.Potential"
 output_dir: .
 navbar:
-  title: Well.Technical.Potential
+  title: "Well Technical Potential"
   left:
   - text: Home
     href: index.html
