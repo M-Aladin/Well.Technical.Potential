@@ -1,0 +1,15 @@
+name: Well.Technical.Potential
+output_dir: .
+navbar:
+  title: Well.Technical.Potential
+  left:
+  - text: Home
+    href: index.html
+  right:
+    - icon: fa-github
+      href: https://github.com/f0nzie/Well.Technical.Potential
+output:
+    html_document:
+        theme: flatly
+        css: style.css
+    output_dir: "."
